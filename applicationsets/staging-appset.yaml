@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: staging-appset
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/rizwanawsgit/argocd-applicationset-advance-setup.git
+        revision: HEAD
+        directories:
+          - path: "manifests/*"
+          - path: "manifests/redis"
+            exclude: true           # Staging mein redis nahi! ✅
+  template:
+    metadata:
+      name: "{{path.basename}}-staging"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/rizwanawsgit/argocd-applicationset-advance-setup.git
+        targetRevision: HEAD
+        path: "{{path}}"
+        helm:
+          valueFiles:
+            - values.yaml
+            - values-staging.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{path.basename}}-staging"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

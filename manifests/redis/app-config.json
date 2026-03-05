@@ -1,4 +1,0 @@
-{
-  "app": "redis",
-  "environments": ["prod"]
-}

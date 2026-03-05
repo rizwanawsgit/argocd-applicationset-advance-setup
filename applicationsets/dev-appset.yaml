@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev-appset
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/rizwanawsgit/argocd-applicationset-advance-setup.git
+        revision: HEAD
+        directories:
+          - path: "manifests/*"     # Sab apps
+          - path: "manifests/redis" # Redis exclude
+            exclude: true           # Dev mein redis nahi! ✅
+  template:
+    metadata:
+      name: "{{path.basename}}-dev"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/rizwanawsgit/argocd-applicationset-advance-setup.git
+        targetRevision: HEAD
+        path: "{{path}}"
+        helm:
+          valueFiles:
+            - values.yaml
+            - values-dev.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{path.basename}}-dev"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

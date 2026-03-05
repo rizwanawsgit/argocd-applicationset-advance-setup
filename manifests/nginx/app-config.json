@@ -1,4 +1,0 @@
-{
-  "app": "nginx",
-  "environments": ["dev", "staging", "prod"]
-}

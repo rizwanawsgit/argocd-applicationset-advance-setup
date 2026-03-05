@@ -1,4 +1,0 @@
-{
-  "app": "frontend",
-  "environments": ["dev", "staging", "prod"]
-}
