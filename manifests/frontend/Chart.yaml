@@ -1,0 +1,4 @@
+apiVersion: v2
+name: frontend
+description: Frontend App
+version: 1.0.0

@@ -1,0 +1,4 @@
+apiVersion: v2
+name: nginx
+description: Nginx App
+version: 1.0.0

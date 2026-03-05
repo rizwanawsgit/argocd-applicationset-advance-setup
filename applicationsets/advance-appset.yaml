@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: advance-appset
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          # Generator 1: Environments
+          - list:
+              elements:
+                - env: dev
+                  namespace: dev
+                - env: staging
+                  namespace: staging
+                - env: prod
+                  namespace: prod
+
+          # Generator 2: Apps from app-config.json
+          - git:
+              repoURL: https://github.com/rizwanawsgit/argocd-applicationset-advance-setup.git
+              revision: HEAD
+              files:
+                - path: "manifests/**/app-config.json"
+
+  # Blind deployment rokne ke liye filter
+  selector:
+    matchExpressions:
+      - key: env
+        operator: In
+        values: "{{environments}}"
+
+  template:
+    metadata:
+      name: "{{app}}-{{env}}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/rizwanawsgit/argocd-applicationset-advance-setup.git
+        targetRevision: HEAD
+        path: "manifests/{{app}}"
+        helm:
+          valueFiles:
+            - values.yaml
+            - "values-{{env}}.yaml"    # Environment specific ✅
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+
+  syncPolicy:
+    preserveResourcesOnDeletion: true  # Prod safe! ✅
